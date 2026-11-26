@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#e87516"><meta name="description" content="श्री राष्ट्रीय जसमा सेना परिवार मध्य प्रदेश">
+<link rel="manifest" href="manifest.json"><link rel="stylesheet" href="style.css">
+<title>श्री राष्ट्रीय जसमा सेना परिवार मध्य प्रदेश</title>
+</head>
+<body>
+<header><div class="brand-mark">जय मां जसमा</div><h1>श्री राष्ट्रीय जसमा सेना परिवार</h1><p>मध्य प्रदेश</p></header>
+<main>
+<div id="notice" class="notice">ऐप का प्रारंभिक संस्करण। Firebase जोड़ने के बाद ऑनलाइन सुविधाएँ चालू होंगी।</div>
+<nav class="tabs">
+<button data-tab="home" class="active">मुख्य पृष्ठ</button><button data-tab="register">सदस्य पंजीयन</button><button data-tab="verify">आईडी जाँच</button><button data-tab="admin">एडमिन</button>
+</nav>
+<section id="home" class="panel active">
+<h2>संगठन में आपका स्वागत है</h2><p>एकता, सेवा और समाज के सम्मान के लिए समर्पित।</p>
+<div class="tiles"><div><b>सदस्य पंजीयन</b><span>ऑनलाइन आवेदन करें</span></div><div><b>डिजिटल पहचान</b><span>QR कोड से सत्यापन</span></div><div><b>संगठन व्यवस्था</b><span>प्रदेश • जिला • तहसील</span></div></div>
+</section>
+<section id="register" class="panel">
+<h2>सदस्यता आवेदन</h2>
+<form id="memberForm">
+<label>पूरा नाम<input name="name" required maxlength="80"></label>
+<label>पिता / पति का नाम<input name="father" maxlength="80"></label>
+<label>मोबाइल नंबर<input name="phone" inputmode="numeric" pattern="[0-9]{10}" required placeholder="10 अंकों का नंबर"></label>
+<label>जिला<input name="district" required></label>
+<label>तहसील<input name="tehsil"></label>
+<label>ग्राम / शहर<input name="village"></label>
+<label>संगठन में पद (यदि हो)<input name="position"></label>
+<label>ईमेल (वैकल्पिक)<input name="email" type="email"></label>
+<label>पासपोर्ट आकार फोटो (वैकल्पिक)<input id="photo" name="photo" type="file" accept="image/*" capture="user"></label><div id="photoPreview" class="photo-preview"></div>
+<button class="primary" type="submit">आवेदन जमा करें</button>
+<p class="small">आवेदन एडमिन की मंजूरी के बाद ही सक्रिय सदस्यता बनेगा।</p>
+</form><div id="registerMsg"></div>
+</section>
+<section id="verify" class="panel">
+<h2>डिजिटल आईडी सत्यापन</h2><form id="verifyForm"><label>आईडी नंबर<input name="id" required placeholder="उदाहरण: JASMA-XXXXXXXX"></label><button class="primary">जाँच करें</button></form><div id="verifyResult"></div>
+</section>
+<section id="admin" class="panel">
+<h2>एडमिन लॉगिन</h2>
+<form id="loginForm"><label>ईमेल<input name="email" type="email" required></label><label>पासवर्ड<input name="password" type="password" required></label><button class="primary">लॉगिन</button></form>
+<div id="adminArea" hidden><div class="admin-head"><b id="adminIdentity"></b><button id="logoutBtn" class="secondary">लॉगआउट</button></div>
+<div class="stats" id="stats"></div><h3>नए आवेदन</h3><div id="pendingList">लोड हो रहा है…</div>
+<h3>सक्रिय सदस्य</h3><div id="activeList"></div>
+</div><div id="adminMsg"></div>
+</section>
+</main>
+<footer>जय मां जसमा • संगठन की आधिकारिक डिजिटल व्यवस्था</footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="firebase-config.js"></script><script src="app.js"></script>
+</body></html>

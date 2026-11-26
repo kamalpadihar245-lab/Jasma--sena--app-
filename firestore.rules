@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function mainAdmin() {
+      return signedIn() && request.auth.token.email == 'Kamalpadihar245@gmail.com';
+    }
+    match /applications/{id} {
+      allow create: if request.resource.data.status == 'pending'
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.phone is string
+        && request.resource.data.phone.matches('^[6-9][0-9]{9}$');
+      allow read, update, delete: if mainAdmin();
+    }
+    match /members/{id} {
+      allow read, write: if mainAdmin();
+    }
+    // सार्वजनिक सत्यापन के लिए अलग संग्रह; इसमें केवल नाम, जिला, पद और आईडी रखें।
+    match /publicMembers/{id} {
+      allow read: if true;
+      allow create, update, delete: if mainAdmin();
+    }
+  }
+}

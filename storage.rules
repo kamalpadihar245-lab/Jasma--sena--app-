@@ -1,0 +1,15 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function mainAdmin() {
+      return request.auth != null && request.auth.token.email == 'Kamalpadihar245@gmail.com';
+    }
+    // आवेदन फोटो केवल मुख्य एडमिन देख सके; अनधिकृत सार्वजनिक पढ़ना बंद है।
+    match /application-photos/{fileName} {
+      allow read: if mainAdmin();
+      allow write: if request.resource != null
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+  }
+}
