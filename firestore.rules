@@ -1,22 +1,53 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() { return request.auth != null; }
-    function mainAdmin() {
-      return signedIn() && request.auth.token.email == 'Kamalpadihar245@gmail.com';
+    function signedIn() {
+      return request.auth != null && request.auth.token.email != null;
     }
+
+    function mainAdmin() {
+      return signedIn()
+        && request.auth.token.email.lower() == 'kamalpadihar245@gmail.com';
+    }
+
+    function presidentAdmin() {
+      return signedIn()
+        && request.auth.token.email.lower() == 'shrirashtriyajasmasenapariwar@gmail.com';
+    }
+
+    function adminReader() {
+      return mainAdmin() || presidentAdmin();
+    }
+
     match /applications/{id} {
-      allow create: if request.resource.data.status == 'pending'
+      // Public member application form. Only the listed fields are accepted.
+      allow create: if request.resource.data.keys().hasOnly([
+          'name', 'father', 'phone', 'district', 'tehsil', 'village',
+          'position', 'email', 'photoPath', 'status', 'createdAt'
+        ])
+        && request.resource.data.status == 'pending'
         && request.resource.data.name is string
         && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 80
         && request.resource.data.phone is string
-        && request.resource.data.phone.matches('^[6-9][0-9]{9}$');
-      allow read, update, delete: if mainAdmin();
+        && request.resource.data.phone.matches('^[6-9][0-9]{9}$')
+        && request.resource.data.district is string
+        && request.resource.data.district.size() > 0
+        && request.resource.data.district.size() <= 100
+        && (!('email' in request.resource.data)
+            || request.resource.data.email is string)
+        && (!('photoPath' in request.resource.data)
+            || request.resource.data.photoPath is string);
+      allow read: if adminReader();
+      allow update, delete: if mainAdmin();
     }
+
     match /members/{id} {
-      allow read, write: if mainAdmin();
+      allow read: if adminReader();
+      allow create, update, delete: if mainAdmin();
     }
-    // सार्वजनिक सत्यापन के लिए अलग संग्रह; इसमें केवल नाम, जिला, पद और आईडी रखें।
+
+    // Only minimum details needed for public ID verification are exposed.
     match /publicMembers/{id} {
       allow read: if true;
       allow create, update, delete: if mainAdmin();

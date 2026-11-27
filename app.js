@@ -23,14 +23,17 @@ if (configured) {
 async function compressPhoto(file) {
   if (!file) return null;
   if (!file.type.startsWith('image/')) throw new Error('कृपया JPG या PNG फोटो चुनें।');
-  if (file.size > 8 * 1024 * 1024) throw new Error('फोटो 8 MB से छोटी चुनें।');
+  if (file.size > 8 * 1024 * 1024) throw new Error('मूल फोटो 8 MB से छोटी चुनें।');
   const url = URL.createObjectURL(file);
   try {
     const img = await new Promise((resolve, reject) => { const i = new Image(); i.onload = () => resolve(i); i.onerror = reject; i.src = url; });
     const scale = Math.min(1, 900 / Math.max(img.width, img.height));
     const c = document.createElement('canvas'); c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
     c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-    return await new Promise(resolve => c.toBlob(resolve, 'image/jpeg', .78));
+    const blob = await new Promise(resolve => c.toBlob(resolve, 'image/jpeg', .72));
+    if (!blob) throw new Error('फोटो तैयार नहीं हो सकी। दूसरी फोटो चुनें।');
+    if (blob.size > 4.5 * 1024 * 1024) throw new Error('फोटो 4.5 MB से बड़ी है। छोटी फोटो चुनें।');
+    return blob;
   } finally { URL.revokeObjectURL(url); }
 }
 const photoInput = $('#photo');
@@ -46,7 +49,9 @@ $('#memberForm').addEventListener('submit', async e => {
   try {
     const d = Object.fromEntries(new FormData(form));
     d.name = (d.name || '').trim(); d.phone = (d.phone || '').replace(/\D/g, '');
+    if (!d.name || d.name.length > 80) throw new Error('कृपया सही नाम भरें।');
     if (!/^[6-9]\d{9}$/.test(d.phone)) throw new Error('सही 10 अंकों का मोबाइल नंबर भरें।');
+    ['father','district','tehsil','village','position','email'].forEach(k => { d[k] = String(d[k] || '').trim().slice(0, 100); });
     const file = photoInput?.files?.[0];
     if (file) {
       if (!storage) throw new Error('फोटो अपलोड के लिए Firebase Storage चालू करना बाकी है।');
@@ -87,11 +92,14 @@ async function loadAdmin() {
   const email = (currentUser.email || '').toLowerCase();
   const mainEmail = (window.MAIN_ADMIN_EMAIL || '').toLowerCase();
   const presidentEmail = (window.PRESIDENT_ADMIN_EMAIL || '').toLowerCase();
-  const isMain = email === mainEmail;
+  const isMain = !!mainEmail && email === mainEmail;
   const isPresident = !!presidentEmail && email === presidentEmail;
   if (!isMain && !isPresident) { await auth.signOut(); msg($('#adminMsg'), 'इस ईमेल को एडमिन अनुमति नहीं है।', 'error'); return; }
   currentAdmin = {isMain, isPresident}; $('#adminArea').hidden = false; $('#loginForm').hidden = true;
   $('#adminIdentity').textContent = (isMain ? 'मुख्य एडमिन' : 'प्रदेश अध्यक्ष एडमिन') + ' : ' + currentUser.email;
+  $('#adminRoleNote').textContent = isMain
+    ? 'आप आवेदन मंजूर कर सकते हैं और सदस्य आईडी बना सकते हैं।'
+    : 'आप आवेदन और सक्रिय सदस्यों की सूची देख सकते हैं। मंजूरी का अधिकार केवल मुख्य एडमिन के पास है।';
   await refreshLists(isMain);
 }
 async function refreshLists(canApprove) {
@@ -124,6 +132,7 @@ async function refreshLists(canApprove) {
     });
   } catch (err) { msg($('#adminMsg'), 'सूची लोड नहीं हुई: '+err.message, 'error'); }
 }
+
 async function approve(id, m) {
   if (!currentAdmin?.isMain) return alert('केवल मुख्य एडमिन सदस्य मंजूर कर सकता है।');
   if (!confirm((m.name || 'इस आवेदन') + ' को मंजूर करके सदस्य आईडी बनानी है?')) return;

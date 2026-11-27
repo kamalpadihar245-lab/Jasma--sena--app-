@@ -9,4 +9,4 @@ window.FIREBASE_CONFIG = {
   measurementId: "G-N1ZM9163YQ"
 };
 window.MAIN_ADMIN_EMAIL = "Kamalpadihar245@gmail.com";
-window.PRESIDENT_ADMIN_EMAIL = "";
+window.PRESIDENT_ADMIN_EMAIL = "shrirashtriyajasmasenapariwar@gmail.com";
